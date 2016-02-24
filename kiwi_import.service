@@ -1,0 +1,4 @@
+<service name="kiwi_import">
+  <summary>Creates an obs kiwi project from a kiwi exchange archive</summary>
+  <description>Creates an obs kiwi project from a kiwi exchange archive</description>
+</service>

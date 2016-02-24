@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+require 'fileutils'
+require 'optparse'
+
+options = {}
+OptionParser.new do |opts|
+  opts.on("--outdir THE_PATH", "the output directory") do |outdir|
+    options[:outdir] = outdir
+  end
+end.parse!
+
+def get_kiwi_archive(path)
+  kiwi_archive = Dir[File.join(path, '/*.kiwi.txz')]
+  if kiwi_archive.length > 1
+    abort('More than one kiwi archives found')
+  elsif kiwi_archive.length == 0
+    abort('No kiwi archive found')
+  end
+
+  kiwi_archive[0]
+end
+
+def extract_archive(archive, outdir)
+  system("tar", "Jxf", archive, "-C", outdir)
+end
+
+def create_root_archive(outdir)
+  system("tar", "cf", File.join(outdir, 'root.tar'), "-C", File.join(outdir, 'root/'), "etc/", "studio/")
+  FileUtils.rm_rf(File.join(outdir, 'root'))
+end
+
+def rename_kiwi_config(outdir)
+  File.rename(File.join(outdir, 'config.xml'), File.join(outdir, 'config.kiwi'))
+end
+
+current_path = Dir.pwd
+outdir = options[:outdir]
+unless File.directory?(outdir) || File.exist?(outdir)
+  abort("Output directory does not exist")
+end
+
+kiwi_archive = get_kiwi_archive(current_path)
+extract_archive(kiwi_archive, outdir)
+create_root_archive(outdir)
+rename_kiwi_config(outdir)
+
