@@ -8,6 +8,9 @@ OptionParser.new do |opts|
   opts.on("--outdir THE_PATH", "the output directory") do |outdir|
     options[:outdir] = outdir
   end
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
 end.parse!
 
 def get_kiwi_archive(path)
@@ -34,7 +37,7 @@ def rename_kiwi_config(outdir)
   File.rename(File.join(outdir, 'config.xml'), File.join(outdir, 'config.kiwi'))
 end
 
-def order_kiwi_repos(outdir, limit = 5)
+def order_kiwi_repos(outdir, options = {}, limit = 5)
   api_url = ENV["OBS_SERVICE_APIURL"]
 
   unless api_url
@@ -42,10 +45,10 @@ def order_kiwi_repos(outdir, limit = 5)
   end
 
   kiwi_config = File.join(outdir, 'config.kiwi')
-  response = request_order_kiwi_repos(api_url, kiwi_config)
+  response = request_order_kiwi_repos(api_url, kiwi_config, options)
 
   while response.kind_of?(Net::HTTPRedirection) && limit > 0
-    response = request_order_kiwi_repos(response['location'], kiwi_config)
+    response = request_order_kiwi_repos(response['location'], kiwi_config, options)
     limit -= 1
   end
 
@@ -56,11 +59,12 @@ def order_kiwi_repos(outdir, limit = 5)
   end
 end
 
-def request_order_kiwi_repos(url, kiwi_config)
+def request_order_kiwi_repos(url, kiwi_config, options)
   uri = URI.parse(url)
 
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = (uri.scheme == "https")
+  https.set_debug_output($stdout) if options[:verbose]
 
   request = Net::HTTP::Post.new("/source?cmd=orderkiwirepos")
   request.body = File.read(kiwi_config)
@@ -79,5 +83,5 @@ kiwi_archive = get_kiwi_archive(current_path)
 extract_archive(kiwi_archive, outdir)
 create_root_archive(outdir)
 rename_kiwi_config(outdir)
-order_kiwi_repos(outdir)
+order_kiwi_repos(outdir, options)
 
