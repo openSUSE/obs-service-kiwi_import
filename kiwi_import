@@ -34,7 +34,7 @@ def rename_kiwi_config(outdir)
   File.rename(File.join(outdir, 'config.xml'), File.join(outdir, 'config.kiwi'))
 end
 
-def order_kiwi_repos(outdir)
+def order_kiwi_repos(outdir, limit = 5)
   api_url = ENV["OBS_SERVICE_APIURL"]
 
   unless api_url
@@ -42,7 +42,22 @@ def order_kiwi_repos(outdir)
   end
 
   kiwi_config = File.join(outdir, 'config.kiwi')
-  uri = URI.parse(api_url)
+  response = request_order_kiwi_repos(api_url, kiwi_config)
+
+  while response.kind_of?(Net::HTTPRedirection) && limit > 0
+    response = request_order_kiwi_repos(response['location'], kiwi_config)
+    limit -= 1
+  end
+
+  if response.code.to_i == 200
+    File.write(kiwi_config, response.body)
+  else
+    abort("Ordering kiwi repositories failed. Backend responded with '#{response.code} - #{response.message}'")
+  end
+end
+
+def request_order_kiwi_repos(url, kiwi_config)
+  uri = URI.parse(url)
 
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = (uri.scheme == "https")
@@ -51,12 +66,7 @@ def order_kiwi_repos(outdir)
   request.body = File.read(kiwi_config)
   request.content_type = "text/xml"
 
-  response = https.request(request)
-  if response.code.to_i == 200
-    File.write(kiwi_config, response.body)
-  else
-    abort("Ordering kiwi repositories failed. Backend responded with '#{response.code} - #{response.message}'")
-  end
+  https.request(request)
 end
 
 current_path = Dir.pwd
