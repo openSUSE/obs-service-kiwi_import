@@ -40,7 +40,7 @@ end
 def order_kiwi_repos(outdir, options = {}, limit = 5)
   api_url = ENV["OBS_SERVICE_APIURL"]
 
-  unless api_url
+  if api_url.to_s.empty?
     abort("No API url defined. This might be caused by using an older osc version.")
   end
 
