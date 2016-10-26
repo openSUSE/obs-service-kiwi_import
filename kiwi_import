@@ -8,6 +8,9 @@ OptionParser.new do |opts|
   opts.on("--outdir THE_PATH", "the output directory") do |outdir|
     options[:outdir] = outdir
   end
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options[:verbose] = v
+  end
 end.parse!
 
 def get_kiwi_archive(path)
@@ -34,29 +37,62 @@ def rename_kiwi_config(outdir)
   File.rename(File.join(outdir, 'config.xml'), File.join(outdir, 'config.kiwi'))
 end
 
-def order_kiwi_repos(outdir)
+def order_kiwi_repos(outdir, options = {})
   api_url = ENV["OBS_SERVICE_APIURL"]
+  kiwi_config = File.join(outdir, 'config.kiwi')
 
-  unless api_url
+  if api_url.to_s.empty?
     abort("No API url defined. This might be caused by using an older osc version.")
   end
 
-  kiwi_config = File.join(outdir, 'config.kiwi')
-  uri = URI.parse(api_url)
+  # We use osc locally as workaround because '/source?cmd=orderkiwirepos'
+  # is currently not accessible via build.o.o due to login proxy restrictions
+  if ENV["OSC_VERSION"].to_s.empty?
+    result = order_via_http(api_url, kiwi_config, options)
+  else
+    result = order_via_osc(kiwi_config)
+  end
+
+  File.write(kiwi_config, result)
+end
+
+def order_via_http(api_url, kiwi_config, options)
+  limit = 5
+  response = send_order_request(api_url, kiwi_config, options)
+
+  while response.kind_of?(Net::HTTPRedirection) && limit > 0
+    response = send_order_request(response['location'], kiwi_config, options)
+    limit -= 1
+  end
+
+  unless response.kind_of?(Net::HTTPSuccess)
+    abort("Ordering kiwi repositories failed. Backend responded with '#{response.code} - #{response.message}'")
+  end
+
+  response.body
+end
+
+def order_via_osc(kiwi_config)
+  cmd = "osc api -X POST /source?cmd=orderkiwirepos -f #{kiwi_config}"
+  result = `#{cmd}`
+  if result.to_s.empty?
+    abort("Ordering kiwi repositories failed. Command: '#{cmd}' failed.")
+  end
+  result
+end
+
+def send_order_request(url, kiwi_config, options)
+  uri = URI.parse(url)
 
   https = Net::HTTP.new(uri.host, uri.port)
   https.use_ssl = (uri.scheme == "https")
+  https.set_debug_output($stdout) if options[:verbose]
 
   request = Net::HTTP::Post.new("/source?cmd=orderkiwirepos")
   request.body = File.read(kiwi_config)
   request.content_type = "text/xml"
 
-  response = https.request(request)
-  if response.code.to_i == 200
-    File.write(kiwi_config, response.body)
-  else
-    abort("Ordering kiwi repositories failed. Backend responded with '#{response.code} - #{response.message}'")
-  end
+  https.request(request)
 end
 
 current_path = Dir.pwd
@@ -69,5 +105,5 @@ kiwi_archive = get_kiwi_archive(current_path)
 extract_archive(kiwi_archive, outdir)
 create_root_archive(outdir)
 rename_kiwi_config(outdir)
-order_kiwi_repos(outdir)
+order_kiwi_repos(outdir, options)
 
