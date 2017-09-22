@@ -56,6 +56,50 @@ def order_kiwi_repos(outdir, options = {})
   File.write(kiwi_config, result)
 end
 
+def replace_sle_placeholder(outdir)
+  # For now we map all SLE12 repositories to the SLE12 SP3 repositories
+  # as we don't plan to support SP0 and SP1
+  repository_map = {
+    "{SLES 12 SP3 Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SLES",
+    "{SLES 12 SP3 x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SLES",
+    "{SLE 12 SP3 SDK x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SDK",
+    "{SLE 12 SP3 SDK Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SDK",
+    "{SLES 12 SP1 Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SLES",
+    "{SLES 12 SP1 x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SLES",
+    "{SLE 12 SP1 SDK x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SDK",
+    "{SLE 12 SP1 SDK Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SDK",
+    "{SLES 12 Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SLES",
+    "{SLES 12 x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SLES",
+    "{SLE 12 SDK x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SDK",
+    "{SLE 12 SDK Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SDK",
+  }
+
+  kiwi_path = File.join(outdir, 'config.kiwi')
+  kiwi_config = File.read(kiwi_path)
+  repository_map.each do |key, value|
+    kiwi_config = kiwi_config.gsub(/#{key}/, value)
+  end
+
+  kiwi_config = kiwi_config.gsub(/<\/image>/, sle_dependency_repository)
+  File.write(kiwi_path, kiwi_config)
+end
+
+def sle_dependency_repository
+  <<-XML
+    <!-- additional packages needed for appliance building -->
+    <repository type="rpm-md">
+      <source path="obs://SUSE:SLE-12-SP3:Update/OBS_Deps"/>
+    </repository>
+  </image>
+  XML
+end
+
+def is_sle?(outdir)
+  # There is no better way to determine if it is a SLE image description
+  # than testing for the boot attribute
+  File.read(File.join(outdir, 'config.kiwi')).include?('oemboot/suse-SLES12')
+end
+
 def order_via_http(api_url, kiwi_config, options)
   limit = 5
   response = send_order_request(api_url, kiwi_config, options)
@@ -105,5 +149,5 @@ kiwi_archive = get_kiwi_archive(current_path)
 extract_archive(kiwi_archive, outdir)
 create_root_archive(outdir)
 rename_kiwi_config(outdir)
+replace_sle_placeholder(outdir) if is_sle?(outdir)
 order_kiwi_repos(outdir, options)
-
