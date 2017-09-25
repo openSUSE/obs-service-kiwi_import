@@ -80,6 +80,9 @@ def replace_sle_placeholder(outdir)
     kiwi_config = kiwi_config.gsub(/#{key}/, value)
   end
 
+  # Replace yast2 repository type with rpm-md
+  kiwi_config = kiwi_config.gsub(/<repository type=("|')yast2("|')>/, '<repository type="rpm-md">')
+
   kiwi_config = kiwi_config.gsub(/<\/image>/, sle_dependency_repository)
   File.write(kiwi_path, kiwi_config)
 end
