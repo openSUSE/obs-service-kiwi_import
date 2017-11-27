@@ -3,6 +3,8 @@ require 'fileutils'
 require 'optparse'
 require 'net/https'
 require './lib/kiwi_archive_finder.rb'
+require './lib/kiwi_archive.rb'
+require './lib/sle_repository_replacer.rb'
 
 options = {}
 OptionParser.new do |opts|
@@ -31,47 +33,6 @@ def order_kiwi_repos(outdir, options = {})
   end
 
   File.write(kiwi_config, result)
-end
-
-def replace_sle_placeholder(outdir)
-  # For now we map all SLE12 repositories to the SLE12 SP3 repositories
-  # as we don't plan to support SP0 and SP1
-  repository_map = {
-    "{SLES 12 SP3 Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SLES",
-    "{SLES 12 SP3 x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SLES",
-    "{SLE 12 SP3 SDK x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SDK",
-    "{SLE 12 SP3 SDK Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SDK",
-    "{SLES 12 SP1 Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SLES",
-    "{SLES 12 SP1 x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SLES",
-    "{SLE 12 SP1 SDK x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SDK",
-    "{SLE 12 SP1 SDK Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SDK",
-    "{SLES 12 Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SLES",
-    "{SLES 12 x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SLES",
-    "{SLE 12 SDK x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SDK",
-    "{SLE 12 SDK Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SDK",
-  }
-
-  kiwi_path = File.join(outdir, 'config.kiwi')
-  kiwi_config = File.read(kiwi_path)
-  repository_map.each do |key, value|
-    kiwi_config = kiwi_config.gsub(/#{key}/, value)
-  end
-
-  # Replace yast2 repository type with rpm-md
-  kiwi_config = kiwi_config.gsub(/<repository type=("|')yast2("|')>/, '<repository type="rpm-md">')
-
-  kiwi_config = kiwi_config.gsub(/<\/image>/, sle_dependency_repository)
-  File.write(kiwi_path, kiwi_config)
-end
-
-def sle_dependency_repository
-  <<-XML
-    <!-- additional packages needed for appliance building -->
-    <repository type="rpm-md">
-      <source path="obs://SUSE:SLE-12-SP3:Update/OBS_Deps"/>
-    </repository>
-  </image>
-  XML
 end
 
 def order_via_http(api_url, kiwi_config, options)
@@ -121,5 +82,5 @@ end
 
 kiwi_archive_path = KiwiArchiveFinder.new(current_path).archive
 kiwi_archive = KiwiArchive.new(kiwi_archive_path, outdir).create_import!
-replace_sle_placeholder(outdir) if kiwi_archive.is_sle?
+kiwi_archive.config = SleRepositoryReplacer.new(kiwi_archive.config).replace!
 order_kiwi_repos(outdir, options)

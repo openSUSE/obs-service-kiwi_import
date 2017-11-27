@@ -31,12 +31,6 @@ class KiwiArchive
     end
   end
 
-  def is_sle?
-    # There is no better way to determine if it is a SLE image description
-    # than testing for the boot attribute
-    config.include?('oemboot/suse-SLES12')
-  end
-
   private
 
   def config_path

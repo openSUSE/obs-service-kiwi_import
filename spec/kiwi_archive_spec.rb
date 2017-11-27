@@ -72,20 +72,4 @@ RSpec.describe KiwiArchive do
       end
     end
   end
-
-  describe '#is_sle?' do
-    context 'for a SLE config file' do
-      it 'returns true' do
-        allow_any_instance_of(KiwiArchive).to receive(:config).and_return('oemboot/suse-SLES12')
-        expect(kiwi_archive.is_sle?).to be_truthy
-      end
-    end
-
-    context 'for an openSUSE config file' do
-      it 'returns true' do
-        allow_any_instance_of(KiwiArchive).to receive(:config).and_return('oemboot/suse-openSUSE42')
-        expect(kiwi_archive.is_sle?).to be_falsy
-      end
-    end
-  end
 end
