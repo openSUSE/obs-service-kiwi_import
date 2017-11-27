@@ -14,19 +14,6 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-def extract_archive(archive, outdir)
-  system("tar", "Jxf", archive, "-C", outdir)
-end
-
-def create_root_archive(outdir)
-  system("tar", "cf", File.join(outdir, 'root.tar'), "-C", File.join(outdir, 'root/'), "etc/", "studio/")
-  FileUtils.rm_rf(File.join(outdir, 'root'))
-end
-
-def rename_kiwi_config(outdir)
-  File.rename(File.join(outdir, 'config.xml'), File.join(outdir, 'config.kiwi'))
-end
-
 def order_kiwi_repos(outdir, options = {})
   api_url = ENV["OBS_SERVICE_APIURL"]
   kiwi_config = File.join(outdir, 'config.kiwi')
@@ -87,12 +74,6 @@ def sle_dependency_repository
   XML
 end
 
-def is_sle?(outdir)
-  # There is no better way to determine if it is a SLE image description
-  # than testing for the boot attribute
-  File.read(File.join(outdir, 'config.kiwi')).include?('oemboot/suse-SLES12')
-end
-
 def order_via_http(api_url, kiwi_config, options)
   limit = 5
   response = send_order_request(api_url, kiwi_config, options)
@@ -138,9 +119,7 @@ unless File.directory?(outdir) || File.exist?(outdir)
   abort("Output directory does not exist")
 end
 
-kiwi_archive = KiwiArchiveFinder.new(current_path).archive
-extract_archive(kiwi_archive, outdir)
-create_root_archive(outdir)
-rename_kiwi_config(outdir)
-replace_sle_placeholder(outdir) if is_sle?(outdir)
+kiwi_archive_path = KiwiArchiveFinder.new(current_path).archive
+kiwi_archive = KiwiArchive.new(kiwi_archive_path, outdir).create_import!
+replace_sle_placeholder(outdir) if kiwi_archive.is_sle?
 order_kiwi_repos(outdir, options)
