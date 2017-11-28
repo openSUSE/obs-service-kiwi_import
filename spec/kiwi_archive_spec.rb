@@ -72,4 +72,30 @@ RSpec.describe KiwiArchive do
       end
     end
   end
+
+  describe '#is_sle?' do
+    let(:config) { File.read('./spec/fixtures/sle_config_input.xml').to_s }
+
+    context 'with a SLE kiwi configuration' do
+      before do
+        kiwi_archive.create_import!
+        kiwi_archive.config = config
+      end
+
+      it 'returns true' do
+        expect(kiwi_archive.is_sle?).to be_truthy
+      end
+    end
+
+    context 'with an openSUSE kiwi configuration' do
+      before do
+        kiwi_archive.create_import!
+        kiwi_archive.config = config.gsub!("boot='oemboot/suse-SLES12'", "boot='oemboot/suse-Leap'")
+      end
+
+      it 'returns false' do
+        expect(kiwi_archive.is_sle?).to be_falsy
+      end
+    end
+  end
 end

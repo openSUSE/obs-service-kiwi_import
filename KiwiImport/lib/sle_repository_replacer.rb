@@ -7,21 +7,13 @@ class SleRepositoryReplacer
   end
 
   def replace!
-    if is_sle?
-      replace_sle_placeholder!
-      replace_repository_type!
-      add_dependency_repository!
-    end
+    replace_sle_placeholder!
+    replace_repository_type!
+    add_dependency_repository!
     config
   end
 
   private
-
-  def is_sle?
-    # There is no better way to determine if it is a SLE image description
-    # than testing for the boot attribute
-    config.include?('oemboot/suse-SLES12')
-  end
 
   SLE_DEPENDENCY_REPOSITORY = <<-XML
     <!-- additional packages needed for appliance building -->

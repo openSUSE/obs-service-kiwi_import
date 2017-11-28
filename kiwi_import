@@ -85,5 +85,7 @@ end
 
 kiwi_archive_path = KiwiArchiveFinder.new(current_path).archive
 kiwi_archive = KiwiArchive.new(kiwi_archive_path, outdir).create_import!
-kiwi_archive.config = SleRepositoryReplacer.new(kiwi_archive.config, config[:sle_repositories]).replace!
+if kiwi_archive.is_sle?
+  kiwi_archive.config = SleRepositoryReplacer.new(kiwi_archive.config, config[:sle_repositories]).replace!
+end
 order_kiwi_repos(outdir, options)
