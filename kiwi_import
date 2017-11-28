@@ -5,7 +5,8 @@ require 'net/https'
 require 'yaml'
 require './KiwiImport/lib/kiwi_archive_finder.rb'
 require './KiwiImport/lib/kiwi_archive.rb'
-require './KiwiImport/lib/sle_repository_replacer.rb'
+require './KiwiImport/lib/repository_replacer.rb'
+require './KiwiImport/lib/repository_appender.rb'
 
 options = {}
 OptionParser.new do |opts|
@@ -86,6 +87,7 @@ end
 kiwi_archive_path = KiwiArchiveFinder.new(current_path).archive
 kiwi_archive = KiwiArchive.new(kiwi_archive_path, outdir).create_import!
 if kiwi_archive.is_sle?
-  kiwi_archive.config = SleRepositoryReplacer.new(kiwi_archive.config, config[:sle_repositories]).replace!
+  kiwi_archive.config = RepositoryReplacer.new(kiwi_archive.config, config[:sle_repositories]).replace!
+  kiwi_archive.config = RepositoryAppender.new(kiwi_archive.config, config[:sle_dependencies_repository]).append!
 end
 order_kiwi_repos(outdir, options)

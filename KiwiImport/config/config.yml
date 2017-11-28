@@ -12,3 +12,4 @@ sle_repositories: {
   "{SLE 12 SDK x86_64}": "obs://SUSE:SLE-12-SP3:GA/SDK",
   "{SLE 12 SDK Updates x86_64}": "obs://SUSE:SLE-12-SP3:Update/SDK"
 }
+sle_dependencies_repository : "obs://SUSE:SLE-12-SP3:Update/OBS_Deps"

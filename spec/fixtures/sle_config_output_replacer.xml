@@ -75,8 +75,4 @@
   <repository type='rpm-md'>
     <source path='obs://SUSE:SLE-12-SP3:Update/SDK'/>
   </repository>
-    <!-- additional packages needed for appliance building -->
-    <repository type="rpm-md">
-      <source path="obs://SUSE:SLE-12-SP3:Update/OBS_Deps"/>
-    </repository>
-  </image>
+</image>
