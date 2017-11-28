@@ -27,7 +27,7 @@ RSpec.describe KiwiArchiveFinder do
       it 'does exit the program' do
         expect {
           KiwiArchiveFinder.new(path).archive
-        }.to raise_error SystemExit
+        }.to raise_error RuntimeError
       end
     end
 
@@ -35,7 +35,7 @@ RSpec.describe KiwiArchiveFinder do
       it 'does exit the program' do
         expect {
           KiwiArchiveFinder.new(path).archive
-        }.to raise_error SystemExit
+        }.to raise_error RuntimeError
       end
     end
   end
