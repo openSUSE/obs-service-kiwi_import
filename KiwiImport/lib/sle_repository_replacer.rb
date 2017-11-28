@@ -1,8 +1,9 @@
 class SleRepositoryReplacer
-  attr_accessor :config
+  attr_accessor :config, :repository_map
 
-  def initialize(config)
+  def initialize(config, repository_map)
     self.config = config
+    self.repository_map = repository_map
   end
 
   def replace!
@@ -22,23 +23,6 @@ class SleRepositoryReplacer
     config.include?('oemboot/suse-SLES12')
   end
 
-  # For now we map all SLE12 repositories to the SLE12 SP3 repositories
-  # as we don't plan to support SP0 and SP1
-  REPOSITORY_MAP = {
-    "{SLES 12 SP3 Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SLES",
-    "{SLES 12 SP3 x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SLES",
-    "{SLE 12 SP3 SDK x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SDK",
-    "{SLE 12 SP3 SDK Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SDK",
-    "{SLES 12 SP1 Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SLES",
-    "{SLES 12 SP1 x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SLES",
-    "{SLE 12 SP1 SDK x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SDK",
-    "{SLE 12 SP1 SDK Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SDK",
-    "{SLES 12 Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SLES",
-    "{SLES 12 x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SLES",
-    "{SLE 12 SDK x86_64}" => "obs://SUSE:SLE-12-SP3:GA/SDK",
-    "{SLE 12 SDK Updates x86_64}" => "obs://SUSE:SLE-12-SP3:Update/SDK",
-  }
-
   SLE_DEPENDENCY_REPOSITORY = <<-XML
     <!-- additional packages needed for appliance building -->
     <repository type="rpm-md">
@@ -48,7 +32,7 @@ class SleRepositoryReplacer
   XML
 
   def replace_sle_placeholder!
-    REPOSITORY_MAP.each do |key, value|
+    repository_map.each do |key, value|
       self.config = config.gsub(/#{key}/, value)
     end
   end

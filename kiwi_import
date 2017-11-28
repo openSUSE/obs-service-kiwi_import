@@ -2,6 +2,7 @@
 require 'fileutils'
 require 'optparse'
 require 'net/https'
+require 'yaml'
 require './KiwiImport/lib/kiwi_archive_finder.rb'
 require './KiwiImport/lib/kiwi_archive.rb'
 require './KiwiImport/lib/sle_repository_replacer.rb'
@@ -76,11 +77,13 @@ end
 
 current_path = Dir.pwd
 outdir = options[:outdir]
+config = YAML.load(File.new('./KiwiImport/config/config.yml').read)
+
 unless File.directory?(outdir) || File.exist?(outdir)
   abort("Output directory does not exist")
 end
 
 kiwi_archive_path = KiwiArchiveFinder.new(current_path).archive
 kiwi_archive = KiwiArchive.new(kiwi_archive_path, outdir).create_import!
-kiwi_archive.config = SleRepositoryReplacer.new(kiwi_archive.config).replace!
+kiwi_archive.config = SleRepositoryReplacer.new(kiwi_archive.config, config[:sle_repositories]).replace!
 order_kiwi_repos(outdir, options)
