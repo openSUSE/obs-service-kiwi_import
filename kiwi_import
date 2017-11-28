@@ -1,12 +1,13 @@
 #!/usr/bin/env ruby
 require 'fileutils'
 require 'optparse'
-require 'net/https'
 require 'yaml'
 require './KiwiImport/lib/kiwi_archive_finder.rb'
 require './KiwiImport/lib/kiwi_archive.rb'
 require './KiwiImport/lib/repository_replacer.rb'
 require './KiwiImport/lib/repository_appender.rb'
+require './KiwiImport/lib/http_repository_orderer.rb'
+require './KiwiImport/lib/osc_repository_orderer.rb'
 
 options = {}
 OptionParser.new do |opts|
@@ -18,76 +19,35 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-def order_kiwi_repos(outdir, options = {})
-  api_url = ENV["OBS_SERVICE_APIURL"]
-  kiwi_config = File.join(outdir, 'config.kiwi')
-
-  if api_url.to_s.empty?
-    abort("No API url defined. This might be caused by using an older osc version.")
-  end
-
-  # We use osc locally as workaround because '/source?cmd=orderkiwirepos'
-  # is currently not accessible via build.o.o due to login proxy restrictions
-  if ENV["OSC_VERSION"].to_s.empty?
-    result = order_via_http(api_url, kiwi_config, options)
-  else
-    result = order_via_osc(kiwi_config)
-  end
-
-  File.write(kiwi_config, result)
-end
-
-def order_via_http(api_url, kiwi_config, options)
-  limit = 5
-  response = send_order_request(api_url, kiwi_config, options)
-
-  while response.kind_of?(Net::HTTPRedirection) && limit > 0
-    response = send_order_request(response['location'], kiwi_config, options)
-    limit -= 1
-  end
-
-  unless response.kind_of?(Net::HTTPSuccess)
-    abort("Ordering kiwi repositories failed. Backend responded with '#{response.code} - #{response.message}'")
-  end
-
-  response.body
-end
-
-def order_via_osc(kiwi_config)
-  cmd = "osc api -X POST /source?cmd=orderkiwirepos -f #{kiwi_config}"
-  result = `#{cmd}`
-  if result.to_s.empty?
-    abort("Ordering kiwi repositories failed. Command: '#{cmd}' failed.")
-  end
-  result
-end
-
-def send_order_request(url, kiwi_config, options)
-  uri = URI.parse(url)
-
-  https = Net::HTTP.new(uri.host, uri.port)
-  https.use_ssl = (uri.scheme == "https")
-  https.set_debug_output($stdout) if options[:verbose]
-
-  request = Net::HTTP::Post.new("/source?cmd=orderkiwirepos")
-  request.body = File.read(kiwi_config)
-  request.content_type = "text/xml"
-
-  https.request(request)
-end
-
 current_path = Dir.pwd
 outdir = options[:outdir]
 config = YAML.load(File.new('./KiwiImport/config/config.yml').read)
+api_url = ENV["OBS_SERVICE_APIURL"]
 
 unless File.directory?(outdir) || File.exist?(outdir)
   abort("Output directory does not exist")
 end
 
-kiwi_archive_path = KiwiArchiveFinder.new(current_path).archive
-kiwi_archive = KiwiArchive.new(kiwi_archive_path, outdir).create_import!
-if kiwi_archive.is_sle?
-  kiwi_archive.config = RepositoryReplacer.new(kiwi_archive.config, config[:sle_repositories]).replace!
-  kiwi_archive.config = RepositoryAppender.new(kiwi_archive.config, config[:sle_dependencies_repository]).append!
+if api_url.to_s.empty?
+  abort("No API url defined. This might be caused by using an older osc version.")
 end
-order_kiwi_repos(outdir, options)
+
+begin
+  kiwi_archive_path = KiwiArchiveFinder.new(current_path).archive
+  kiwi_archive = KiwiArchive.new(kiwi_archive_path, outdir).create_import!
+  if kiwi_archive.is_sle?
+    kiwi_archive.config = RepositoryReplacer.new(kiwi_archive.config, config[:sle_repositories]).replace!
+    kiwi_archive.config = RepositoryAppender.new(kiwi_archive.config, config[:sle_dependencies_repository]).append!
+  end
+
+  # We use osc locally as workaround because '/source?cmd=orderkiwirepos'
+  # is currently not accessible via build.o.o due to login proxy restrictions
+  if ENV["OSC_VERSION"].to_s.empty?
+    orderer = HttpRepositoryOrderer.new(kiwi_archive.config, options, api_url)
+  else
+    orderer = OscRepositoryOrderer.new(kiwi_archive.config_path)
+  end
+  kiwi_archive.config = orderer.order!
+rescue RuntimeError => error
+  abort(error.message)
+end

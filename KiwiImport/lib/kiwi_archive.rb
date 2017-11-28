@@ -37,11 +37,11 @@ class KiwiArchive
     config.include?('oemboot/suse-SLES12')
   end
 
-  private
-
   def config_path
     File.join(output_path, config_name)
   end
+
+  private
 
   def extract!
     system("tar", "Jxf", archive_path, "-C", output_path)
