@@ -2,9 +2,9 @@
 require 'fileutils'
 require 'optparse'
 require 'net/https'
-require './lib/kiwi_archive_finder.rb'
-require './lib/kiwi_archive.rb'
-require './lib/sle_repository_replacer.rb'
+require './KiwiImport/lib/kiwi_archive_finder.rb'
+require './KiwiImport/lib/kiwi_archive.rb'
+require './KiwiImport/lib/sle_repository_replacer.rb'
 
 options = {}
 OptionParser.new do |opts|

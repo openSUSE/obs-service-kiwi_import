@@ -1,4 +1,4 @@
-require './lib/kiwi_archive.rb'
+require './KiwiImport/lib/kiwi_archive.rb'
 
 RSpec.describe KiwiArchive do
   let(:output_directory) { "./spec/tmp/output" }

@@ -1,4 +1,4 @@
-require './lib/sle_repository_replacer.rb'
+require './KiwiImport/lib/sle_repository_replacer.rb'
 
 RSpec.describe SleRepositoryReplacer do
   describe '#replace!' do

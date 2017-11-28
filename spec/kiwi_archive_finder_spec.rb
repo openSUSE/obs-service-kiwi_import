@@ -1,4 +1,4 @@
-require './lib/kiwi_archive_finder.rb'
+require './KiwiImport/lib/kiwi_archive_finder.rb'
 
 RSpec.describe KiwiArchiveFinder do
   describe '#archive' do
