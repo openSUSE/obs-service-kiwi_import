@@ -1,13 +1,14 @@
 #!/usr/bin/ruby
+lib = File.expand_path File.dirname(__FILE__)
 require 'fileutils'
 require 'optparse'
 require 'yaml'
-require './KiwiImport/lib/kiwi_archive_finder.rb'
-require './KiwiImport/lib/kiwi_archive.rb'
-require './KiwiImport/lib/repository_replacer.rb'
-require './KiwiImport/lib/repository_appender.rb'
-require './KiwiImport/lib/http_repository_orderer.rb'
-require './KiwiImport/lib/osc_repository_orderer.rb'
+require "#{lib}/KiwiImport/lib/kiwi_archive_finder.rb"
+require "#{lib}/KiwiImport/lib/kiwi_archive.rb"
+require "#{lib}/KiwiImport/lib/repository_replacer.rb"
+require "#{lib}/KiwiImport/lib/repository_appender.rb"
+require "#{lib}/KiwiImport/lib/http_repository_orderer.rb"
+require "#{lib}/KiwiImport/lib/osc_repository_orderer.rb"
 
 options = {}
 OptionParser.new do |opts|
@@ -22,7 +23,7 @@ end.parse!
 raise OptionParser::MissingArgument if options[:outdir].nil?
 
 outdir = options[:outdir]
-config = YAML.load(File.new('./KiwiImport/config/config.yml').read)
+config = YAML.load(File.new("#{lib}/KiwiImport/config/config.yml").read)
 api_url = ENV["OBS_SERVICE_APIURL"]
 
 unless File.directory?(outdir) || File.exist?(outdir)
