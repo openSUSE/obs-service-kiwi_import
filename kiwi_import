@@ -26,29 +26,25 @@ config = YAML.load(File.new('./KiwiImport/config/config.yml').read)
 api_url = ENV["OBS_SERVICE_APIURL"]
 
 unless File.directory?(outdir) || File.exist?(outdir)
-  abort("Output directory does not exist")
+  raise "Output directory does not exist"
 end
 
 if api_url.to_s.empty?
-  abort("No API url defined. This might be caused by using an older osc version.")
+  raise "No API url defined. This might be caused by using an older osc version."
 end
 
-begin
-  kiwi_archive_path = KiwiArchiveFinder.new.archive
-  kiwi_archive = KiwiArchive.new(kiwi_archive_path, outdir).create_import!
-  if kiwi_archive.is_sle?
-    kiwi_archive.config = RepositoryReplacer.new(kiwi_archive.config, config[:sle_repositories]).replace!
-    kiwi_archive.config = RepositoryAppender.new(kiwi_archive.config, config[:sle_dependencies_repository]).append!
-  end
-
-  # We use osc locally as workaround because '/source?cmd=orderkiwirepos'
-  # is currently not accessible via build.o.o due to login proxy restrictions
-  if ENV["OSC_VERSION"].to_s.empty?
-    orderer = HttpRepositoryOrderer.new(kiwi_archive.config, options, api_url)
-  else
-    orderer = OscRepositoryOrderer.new(kiwi_archive.config_path)
-  end
-  kiwi_archive.config = orderer.order!
-rescue RuntimeError => error
-  abort(error.message)
+kiwi_archive_path = KiwiArchiveFinder.new.archive
+kiwi_archive = KiwiArchive.new(kiwi_archive_path, outdir).create_import!
+if kiwi_archive.is_sle?
+  kiwi_archive.config = RepositoryReplacer.new(kiwi_archive.config, config[:sle_repositories]).replace!
+  kiwi_archive.config = RepositoryAppender.new(kiwi_archive.config, config[:sle_dependencies_repository]).append!
 end
+
+# We use osc locally as workaround because '/source?cmd=orderkiwirepos'
+# is currently not accessible via build.o.o due to login proxy restrictions
+if ENV["OSC_VERSION"].to_s.empty?
+  orderer = HttpRepositoryOrderer.new(kiwi_archive.config, options, api_url)
+else
+  orderer = OscRepositoryOrderer.new(kiwi_archive.config_path)
+end
+kiwi_archive.config = orderer.order!
