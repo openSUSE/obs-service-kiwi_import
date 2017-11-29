@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby
 require 'fileutils'
 require 'optparse'
 require 'yaml'
@@ -18,6 +18,8 @@ OptionParser.new do |opts|
     options[:verbose] = v
   end
 end.parse!
+
+raise OptionParser::MissingArgument if options[:outdir].nil?
 
 outdir = options[:outdir]
 config = YAML.load(File.new('./KiwiImport/config/config.yml').read)
