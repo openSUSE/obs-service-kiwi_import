@@ -13,6 +13,7 @@ class KiwiArchive
     extract!
     create_root_archive!
     rename_kiwi_config!
+    self
   end
 
   def config

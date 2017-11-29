@@ -18,7 +18,7 @@ RSpec.describe KiwiArchive do
 
   describe '#create_import!' do
     before do
-      kiwi_archive.create_import!
+      @result = kiwi_archive.create_import!
     end
 
     it 'renames the kiwi config' do
@@ -32,6 +32,10 @@ RSpec.describe KiwiArchive do
     it 'packs all files into the root.tar' do
       allow(kiwi_archive).to receive(:system).with("tar", "cf", "./spec/tmp/output/root.tar", "-C", "./spec/tmp/output/root", ".").and_return(true)
       kiwi_archive.create_import!
+    end
+
+    it 'returns a KiwiArchive' do
+      expect(@result).to eq(kiwi_archive)
     end
   end
 
