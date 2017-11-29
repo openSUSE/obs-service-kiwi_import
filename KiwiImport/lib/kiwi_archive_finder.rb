@@ -1,7 +1,7 @@
 class KiwiArchiveFinder
   attr_accessor :path
 
-  def initialize(path)
+  def initialize(path = Dir.pwd)
     self.path = path
   end
 

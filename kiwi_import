@@ -19,7 +19,6 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-current_path = Dir.pwd
 outdir = options[:outdir]
 config = YAML.load(File.new('./KiwiImport/config/config.yml').read)
 api_url = ENV["OBS_SERVICE_APIURL"]
@@ -33,7 +32,7 @@ if api_url.to_s.empty?
 end
 
 begin
-  kiwi_archive_path = KiwiArchiveFinder.new(current_path).archive
+  kiwi_archive_path = KiwiArchiveFinder.new.archive
   kiwi_archive = KiwiArchive.new(kiwi_archive_path, outdir).create_import!
   if kiwi_archive.is_sle?
     kiwi_archive.config = RepositoryReplacer.new(kiwi_archive.config, config[:sle_repositories]).replace!
