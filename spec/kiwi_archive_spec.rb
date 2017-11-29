@@ -28,6 +28,11 @@ RSpec.describe KiwiArchive do
     it 'creates a root.tar archive' do
       expect(File.exists?("#{output_directory}/root.tar")).to be_truthy
     end
+
+    it 'packs all files into the root.tar' do
+      allow(kiwi_archive).to receive(:system).with("tar", "cf", "./spec/tmp/output/root.tar", "-C", "./spec/tmp/output/root", ".").and_return(true)
+      kiwi_archive.create_import!
+    end
   end
 
   describe '#config' do

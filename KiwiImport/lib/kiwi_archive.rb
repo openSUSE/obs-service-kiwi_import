@@ -44,12 +44,14 @@ class KiwiArchive
   private
 
   def extract!
-    system("tar", "Jxf", archive_path, "-C", output_path)
+    unless extracted?
+      system("tar", "Jxf", archive_path, "-C", output_path)
+    end
     self.extracted = true
   end
 
   def create_root_archive!
-    system("tar", "cf", File.join(output_path, 'root.tar'), "-C", File.join(output_path, 'root/'), "etc/", "studio/")
+    system("tar", "cf", File.join(output_path, 'root.tar'), "-C", File.join(output_path, 'root'), ".")
     FileUtils.rm_rf(File.join(output_path, 'root'))
   end
 
