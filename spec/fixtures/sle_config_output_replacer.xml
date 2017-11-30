@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<image name='Christians_SLES_12_SP2_JeOS' displayname='Christians_SLES_12_SP2_JeOS' schemaversion='5.2'>
+  <description type='system'>
+    <author>Christian Bruckmayer</author>
+    <contact>noemail@example.com</contact>
+    <specification>Minimal SLES 12 SP2</specification>
+  </description>
+  <preferences>
+    <type checkprebuilt='true' boot='oemboot/suse-SLES12' fsnocheck='true' filesystem='ext3' bootloader='grub2' installiso='true' installboot='install' kernelcmdline='quiet' fsmountoptions='acl' image='oem'>
+      <systemdisk name='systemVG'>
+        <volume name='@root' size='2000M'/>
+        <volume name='/foobar' size='500M'/>
+      </systemdisk>
+      <oemconfig>
+        <oem-swap>true</oem-swap>
+        <oem-swapsize>512</oem-swapsize>
+        <oem-device-filter>/dev/ram</oem-device-filter>
+      </oemconfig>
+    </type>
+    <version>0.0.2</version>
+    <packagemanager>zypper</packagemanager>
+    <rpm-check-signatures>false</rpm-check-signatures>
+    <rpm-force>false</rpm-force>
+    <boot-theme>studio</boot-theme>
+    <timezone>UTC</timezone>
+    <hwclock>localtime</hwclock>
+  </preferences>
+  <users group='root'>
+    <user name='root' pwd='$1$52DwzufU$tkqEmDhAeeVJlRqCz0bp01' home='/root' shell='/bin/bash'/>
+  </users>
+  <packages type='image' patternType='onlyRequired'>
+    <package name='ca-certificates'/>
+    <package name='cracklib-dict-full'/>
+    <package name='dracut'/>
+    <package name='filesystem'/>
+    <package name='fontconfig'/>
+    <package name='fonts-config'/>
+    <package name='grub2'/>
+    <package name='iproute2'/>
+    <package name='iputils'/>
+    <package name='kernel-default'/>
+    <package name='lvm2'/>
+    <package name='net-tools'/>
+    <package name='openssh'/>
+    <package name='plymouth'/>
+    <package name='parted'/>
+    <package name='sles-release'/>
+    <package name='suse-build-key'/>
+    <package name='syslinux'/>
+    <package name='systemd'/>
+    <package name='systemd-sysvinit'/>
+    <package name='tar'/>
+    <package name='udev'/>
+    <package name='vim'/>
+    <package name='wicked'/>
+    <package name='zypper'/>
+    <package name='less'/>
+    <package name='timezone'/>
+    <package name='syslog-service'/>
+    <archive name='plymouth.tar' bootinclude='true'/>
+  </packages>
+  <packages type='bootstrap'>
+    <package name='filesystem'/>
+    <package name='glibc-locale'/>
+  </packages>
+  <repository type='rpm-md'>
+    <source path='obs://SUSE:SLE-12-SP3:GA/SLES'/>
+  </repository>
+  <repository type='rpm-md'>
+    <source path='obs://SUSE:SLE-12-SP3:GA/SDK'/>
+  </repository>
+  <repository type='rpm-md'>
+    <source path='obs://SUSE:SLE-12-SP3:Update/SLES'/>
+  </repository>
+  <repository type='rpm-md'>
+    <source path='obs://SUSE:SLE-12-SP3:Update/SDK'/>
+  </repository>
+</image>
