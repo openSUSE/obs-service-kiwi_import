@@ -44,7 +44,7 @@ end
 # We use osc locally as workaround because '/source?cmd=orderkiwirepos'
 # is currently not accessible via build.o.o due to login proxy restrictions
 if ENV["OSC_VERSION"].to_s.empty?
-  orderer = HttpRepositoryOrderer.new(kiwi_archive.config, options, api_url)
+  orderer = HttpRepositoryOrderer.new(kiwi_archive.config, api_url, options)
 else
   orderer = OscRepositoryOrderer.new(kiwi_archive.config_path)
 end
