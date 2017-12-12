@@ -37,8 +37,8 @@ end
 kiwi_archive_path = KiwiArchiveFinder.new.archive
 kiwi_archive = KiwiArchive.new(kiwi_archive_path, outdir).create_import!
 if kiwi_archive.is_sle?
-  kiwi_archive.config = RepositoryReplacer.new(kiwi_archive.config, config[:sle_repositories]).replace!
-  kiwi_archive.config = RepositoryAppender.new(kiwi_archive.config, config[:sle_dependencies_repository]).append!
+  kiwi_archive.config = RepositoryReplacer.new(kiwi_archive.config, config["sle_repositories"]).replace!
+  kiwi_archive.config = RepositoryAppender.new(kiwi_archive.config, config["sle_dependencies_repository"]).append!
 end
 
 # We use osc locally as workaround because '/source?cmd=orderkiwirepos'

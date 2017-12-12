@@ -15,6 +15,12 @@ RSpec.describe RepositoryReplacer do
           replacer.replace!
         }.to change { replacer.config.strip }.from(input).to(output)
       end
+
+    it 'does not crash when repository map is nil' do
+        expect {
+          RepositoryReplacer.new(input, nil).replace!
+        }.not_to raise_exception
+      end
     end
   end
 end
