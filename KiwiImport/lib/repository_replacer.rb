@@ -3,7 +3,7 @@ class RepositoryReplacer
 
   def initialize(config, repository_map)
     self.config = config
-    self.repository_map = repository_map
+    self.repository_map = repository_map || []
   end
 
   def replace!
