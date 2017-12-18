@@ -18,7 +18,7 @@ class KiwiArchive
 
   def config
     if extracted?
-      File.read(config_path).to_s
+      File.read(config_path, encoding: "utf-8").to_s
     else
       raise 'KiwiArchive not extracted yet. Use #create_import! first.'
     end
