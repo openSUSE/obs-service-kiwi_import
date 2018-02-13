@@ -14,6 +14,11 @@ sle_repositories: {
   "{SLES 12 Updates x86_64}": "obs://SUSE:SLE-12-SP3:Update/SLES",
   "{SLES 12 x86_64}": "obs://SUSE:SLE-12-SP3:GA/SLES",
   "{SLE 12 SDK x86_64}": "obs://SUSE:SLE-12-SP3:GA/SDK",
-  "{SLE 12 SDK Updates x86_64}": "obs://SUSE:SLE-12-SP3:Update/SDK"
+  "{SLE 12 SDK Updates x86_64}": "obs://SUSE:SLE-12-SP3:Update/SDK",
+
+  "{SLES 11 SP4 Updates x86_64}": "obs://SUSE:SLE-11-SP4:Update/SLES",
+  "{SLES 11 SP4 x86_64}": "obs://SUSE:SLE-11-SP4:GA/SLES",
+  "{SLE 11 SP4 SDK x86_64}": "obs://SUSE:SLE-11-SP4:GA/SDK",
+  "{SLE 11 SP4 SDK Updates x86_64}": "obs://SUSE:SLE-11-SP4:Update/SDK"
 }
 sle_dependencies_repository : "obs://SUSE:SLE-12-SP3:Update/OBS_Deps"
