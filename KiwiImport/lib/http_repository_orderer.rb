@@ -33,12 +33,14 @@ class HttpRepositoryOrderer
 
   def send_order_request(url)
     uri = URI.parse(url)
-
     https = Net::HTTP.new(uri.host, uri.port)
     https.use_ssl = (uri.scheme == "https")
     https.set_debug_output($stdout) if options[:verbose]
 
     request = Net::HTTP::Post.new("/source?cmd=orderkiwirepos")
+    if ENV.key?('OBS_SERVICE_USER')
+       request.basic_auth(ENV['OBS_SERVICE_USER'], ENV['OBS_SERVICE_PASS'])
+    end
     request.body = config
     request.content_type = "text/xml"
 
