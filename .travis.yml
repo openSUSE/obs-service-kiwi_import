@@ -1,5 +1,0 @@
-language: ruby
-rvm: 2.5.8
-script:
-  - bundle exec rspec
-cache: bundler
