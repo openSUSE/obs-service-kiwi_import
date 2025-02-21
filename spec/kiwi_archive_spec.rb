@@ -1,3 +1,4 @@
+require 'fileutils'
 require './KiwiImport/lib/kiwi_archive.rb'
 
 RSpec.describe KiwiArchive do
