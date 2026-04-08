@@ -23,11 +23,11 @@ RSpec.describe KiwiArchive do
     end
 
     it 'renames the kiwi config' do
-      expect(File.exists?("#{output_directory}/config.kiwi")).to be_truthy
+      expect(File.exist?("#{output_directory}/config.kiwi")).to be_truthy
     end
 
     it 'creates a root.tar archive' do
-      expect(File.exists?("#{output_directory}/root.tar")).to be_truthy
+      expect(File.exist?("#{output_directory}/root.tar")).to be_truthy
     end
 
     it 'packs all files into the root.tar' do
