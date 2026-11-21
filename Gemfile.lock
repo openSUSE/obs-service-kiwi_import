@@ -8,7 +8,7 @@ GEM
       bigdecimal
       rexml
     diff-lcs (1.6.2)
-    hashdiff (1.2.1)
+    hashdiff (1.2.2)
     public_suffix (7.0.5)
     rexml (3.4.4)
     rspec (3.13.2)
@@ -24,7 +24,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.6)
-    webmock (3.30.0)
+    webmock (3.36.0)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
